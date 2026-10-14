@@ -1,0 +1,2601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="tab-title">Vengeance</title>
+    <link id="tab-favicon" rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --theme-color: #a855f7;
+            --theme-glow: #9333ea;
+            --theme-light: #d8b4fe;
+            --theme-bg-tint: rgba(168, 85, 247, 0.4);
+            --theme-active-bg: rgba(147, 51, 234, 0.25);
+            --theme-btn-bg: #9333ea;
+            --theme-btn-hover: #a855f7;
+            --theme-btn-disabled: #4a2068;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #030008;
+            color: #ffffff;
+            min-height: 100vh;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Dynamic Background Layer */
+        #bg-canvas, #bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        #bg-pattern {
+            display: none;
+        }
+
+        .main-wrapper {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1650px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+            justify-content: flex-start;
+        }
+
+        #site-title-img {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            margin-bottom: 25px;
+            display: block;
+            filter: none;
+        }
+
+        /* Nav Buttons */
+        .nav-buttons-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-square-btn {
+            width: 85px;
+            height: 85px;
+            background: rgba(12, 2, 26, 0.85);
+            border: 2px solid var(--theme-bg-tint);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            color: var(--theme-light);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+
+        .nav-square-btn:hover, .nav-square-btn.active {
+            border-color: var(--theme-color);
+            background: var(--theme-active-bg);
+            box-shadow: 0 0 20px var(--theme-bg-tint);
+            transform: translateY(-3px);
+            color: #ffffff;
+        }
+
+        .nav-btn-icon {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        /* View Panels */
+        .view-panel {
+            display: none;
+            width: 100%;
+            height: 1000px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .view-panel.active {
+            display: flex;
+        }
+
+        /* Codespace Panel */
+        #panel-codespace {
+            width: 100%;
+            height: calc(100vh - 250px);
+            max-width: 1600px;
+        }
+
+        .codespace-frame-viewport {
+            width: 1500px;
+            height: 1000px;
+            border: 2px solid var(--theme-bg-tint);
+            border-radius: 12px;
+            background: #000000;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        /* AI Interface Section */
+#panel-ai {
+    width: 100%;
+    max-width: 440px;
+    height: 650px;
+}
+
+        .ai-chat-card {
+            width: 1000px;
+            height: 100%;
+            background: rgba(12, 2, 26, 0.9);
+            border: 2px solid var(--theme-bg-tint);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        .ai-chat-header {
+            padding: 15px 20px;
+            background: rgba(168, 85, 247, 0.15);
+            border-bottom: 1px solid var(--theme-bg-tint);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ai-status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--theme-light);
+        }
+
+        .ai-status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #39ff14;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #39ff14;
+        }
+
+        .ai-iframe-viewport {
+            width: 1000px;
+            height: 100%;
+            border: none;
+            flex-grow: 1;
+            background: #000000;
+        }
+
+        /* Search Bar */
+        .search-container {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 35px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(10, 2, 26, 0.85);
+            border: 2px solid var(--theme-color);
+            border-radius: 30px;
+            padding: 14px 25px;
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-align: center;
+            outline: none;
+            box-shadow: 0 0 15px var(--theme-bg-tint);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            box-shadow: 0 0 25px var(--theme-color);
+            border-color: var(--theme-light);
+        }
+
+        /* ================= SINGLE GAME BANNER ================= */
+        .games-banner-container {
+            width: 100%;
+            max-width: 1100px;
+            position: relative;
+            background: linear-gradient(135deg, rgba(20, 4, 42, 0.95), rgba(8, 1, 18, 0.95));
+            border: 2px solid var(--theme-color);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 35px;
+            box-shadow: 0 10px 30px var(--theme-bg-tint);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .banner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .banner-tag {
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.95rem;
+            color: var(--theme-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .banner-tag::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: var(--theme-color);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--theme-color);
+        }
+
+        .banner-dots-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .banner-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid var(--theme-bg-tint);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .banner-dot:hover {
+            background: var(--theme-light);
+            transform: scale(1.2);
+        }
+
+        .banner-dot.active {
+            background: var(--theme-color);
+            box-shadow: 0 0 10px var(--theme-glow);
+            transform: scale(1.3);
+            border-color: #ffffff;
+        }
+
+        .banner-single-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 20px;
+        }
+
+        .banner-arrow-btn {
+            background: rgba(12, 2, 26, 0.9);
+            border: 2px solid var(--theme-color);
+            color: #ffffff;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+            transition: all 0.2s ease;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .banner-arrow-btn:hover {
+            background: var(--theme-color);
+            transform: scale(1.15);
+            box-shadow: 0 0 20px var(--theme-glow);
+        }
+
+        .banner-single-card {
+            flex-grow: 1;
+            max-width: 800px;
+            height: 320px;
+            background: #0c021a;
+            border: 2px solid var(--theme-bg-tint);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .banner-single-card:hover {
+            border-color: var(--theme-light);
+            transform: translateY(-3px);
+            box-shadow: 0 0 35px var(--theme-glow);
+        }
+
+        .banner-single-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .banner-single-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .banner-single-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(3, 0, 8, 0.95), rgba(3, 0, 8, 0.6) 65%, transparent);
+            padding: 24px 20px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .banner-single-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.95);
+        }
+
+        .banner-play-hint {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--theme-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 750px) {
+            .banner-single-card { height: 220px; }
+            .banner-single-title { font-size: 1.15rem; }
+            .banner-arrow-btn { width: 40px; height: 40px; font-size: 1rem; }
+        }
+
+        /* Games Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 16px;
+            width: 100%;
+            max-width: 1600px;
+        }
+
+        @media (max-width: 1500px) {
+            .games-grid { grid-template-columns: repeat(6, 1fr); }
+        }
+        @media (max-width: 1100px) {
+            .games-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 700px) {
+            .games-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .game-card {
+            position: relative;
+            background-color: #0c021a;
+            border: 2px solid var(--theme-bg-tint);
+            border-radius: 12px;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .game-card:hover {
+            border-color: var(--theme-color);
+            box-shadow: 0 0 20px var(--theme-bg-tint);
+            transform: translateY(-4px);
+        }
+
+        .game-card img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .game-card span {
+            position: relative;
+            z-index: 2;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            line-height: 1.1;
+            width: 100%;
+            background: rgba(3, 0, 8, 0.75);
+            padding: 4px;
+            border-radius: 4px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+        }
+
+        /* ================= MOVIE & ANIME DISPLAY / CONTROLS ================= */
+        .movie-carousel-wrapper {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            margin-top: 10px;
+        }
+
+        .movie-controls-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            width: 100%;
+        }
+
+        .movie-nav-btn {
+            width: 65px;
+            height: 65px;
+            background: rgba(12, 2, 26, 0.9);
+            border: 2px solid var(--theme-bg-tint);
+            border-radius: 50%;
+            color: #ffffff;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        }
+
+        .movie-nav-btn:hover {
+            border-color: var(--theme-color);
+            background: var(--theme-btn-bg);
+            box-shadow: 0 0 25px var(--theme-glow);
+            transform: scale(1.1);
+        }
+
+        .movie-center-btn {
+            flex-grow: 1;
+            max-width: 580px;
+            padding: 22px 35px;
+            background: linear-gradient(135deg, var(--theme-btn-bg), var(--theme-color));
+            border: 2px solid #ffffff;
+            border-radius: 18px;
+            color: #ffffff;
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: 0 0 35px var(--theme-glow);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+        }
+
+        .movie-center-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 0 50px var(--theme-color);
+            background: linear-gradient(135deg, var(--theme-btn-hover), #ffffff);
+            color: #030008;
+        }
+
+        .movie-showcase-display {
+            width: 100%;
+            max-width: 780px;
+            background: rgba(12, 2, 26, 0.95);
+            border: 2px solid var(--theme-color);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .movie-showcase-display:hover {
+            box-shadow: 0 0 35px var(--theme-bg-tint);
+            transform: translateY(-3px);
+        }
+
+        .movie-showcase-img-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .movie-showcase-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .movie-showcase-footer {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(12, 2, 26, 0.98);
+            border-top: 1px solid var(--theme-bg-tint);
+        }
+
+        .movie-showcase-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ffffff;
+        }
+
+        .movie-counter-tag {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--theme-light);
+        }
+
+        /* ================= MUSIC & ANIME LIST VIEW ================= */
+        .music-list-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .music-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: rgba(12, 2, 26, 0.85);
+            border: 1px solid var(--theme-bg-tint);
+            border-radius: 14px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .music-list-item:hover {
+            border-color: var(--theme-color);
+            background: var(--theme-active-bg);
+            box-shadow: 0 0 15px var(--theme-bg-tint);
+            transform: translateX(5px);
+        }
+
+        .music-list-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .music-list-thumbnail {
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--theme-bg-tint);
+            background: #000;
+        }
+
+        .music-list-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .music-list-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .music-list-play-btn {
+            background: var(--theme-btn-bg);
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .music-list-play-btn:hover {
+            background: var(--theme-btn-hover);
+        }
+
+        .star-btn-inline {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, color 0.2s;
+        }
+
+        .star-btn-inline:hover {
+            transform: scale(1.2);
+            color: #fde047;
+        }
+
+        .star-btn-inline.favorited {
+            color: #eab308;
+        }
+
+        .star-btn-inline svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        /* Music Player Interface */
+        .music-player-card {
+            width: 100%;
+            max-width: 950px;
+            background: rgba(12, 2, 26, 0.9);
+            border: 2px solid var(--theme-bg-tint);
+            border-radius: 16px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+        }
+
+        .music-player-body {
+            display: flex;
+            align-items: center;
+            gap: 35px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .music-main-art {
+            width: 200px;
+            height: 200px;
+            min-width: 200px;
+            border-radius: 16px;
+            border: 2px solid var(--theme-bg-tint);
+            object-fit: cover;
+            background: #000;
+            box-shadow: 0 0 25px var(--theme-bg-tint);
+        }
+
+        .music-info-side {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .music-now-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 1px;
+            word-break: break-word;
+            text-shadow: 0 0 15px var(--theme-glow);
+        }
+
+        .music-drive-preview-frame {
+            width: 100%;
+            height: 80px;
+            border: 2px solid var(--theme-bg-tint);
+            border-radius: 10px;
+            background: #000000;
+        }
+
+        .status-msg {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--theme-light);
+            font-size: 1.2rem;
+            padding: 40px;
+        }
+
+        /* Settings Card & Controls */
+        .settings-container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .settings-card {
+            background: rgba(12, 2, 26, 0.85);
+            border: 2px solid var(--theme-bg-tint);
+            border-radius: 16px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        .settings-card-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: var(--theme-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--theme-bg-tint);
+            padding-bottom: 10px;
+        }
+
+        .settings-field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .settings-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            color: #9da3af;
+            text-transform: uppercase;
+        }
+
+        .settings-select, .settings-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--theme-bg-tint);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #ffffff;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .settings-select {
+            cursor: pointer;
+        }
+
+        .settings-select option {
+            background: #0c021a;
+            color: #ffffff;
+        }
+
+        .settings-select:focus, .settings-input:focus {
+            border-color: var(--theme-color);
+            box-shadow: 0 0 10px var(--theme-bg-tint);
+        }
+
+        .settings-btn {
+            background: var(--theme-btn-bg);
+            border: none;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            text-transform: uppercase;
+        }
+
+        .settings-btn:hover {
+            background: var(--theme-btn-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Screen Overlay for Players */
+        #media-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(3, 0, 8, 0.98);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .overlay-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .close-btn {
+            background: var(--theme-btn-bg);
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: bold;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .close-btn:hover {
+            background: var(--theme-btn-hover);
+        }
+
+        #media-frame {
+            width: 100%;
+            flex-grow: 1;
+            border: 2px solid var(--theme-color);
+            border-radius: 12px;
+            background: #000;
+        }
+
+        /* Info Screen Styles */
+        .info-button-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .info-action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px 28px;
+            background: rgba(12, 2, 26, 0.9);
+            border: 2px solid var(--theme-bg-tint);
+            border-radius: 12px;
+            color: #ffffff;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            flex: 1;
+            min-width: 200px;
+            max-width: 240px;
+        }
+
+        .info-action-btn:hover {
+            border-color: var(--theme-color);
+            background: var(--theme-active-bg);
+            box-shadow: 0 0 20px var(--theme-bg-tint);
+            transform: translateY(-3px);
+            color: var(--theme-light);
+        }
+
+        .info-action-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .info-content-box {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--theme-bg-tint);
+            border-radius: 10px;
+            padding: 20px;
+            white-space: pre-line;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Tool Calculator Grid */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .calc-btn {
+            background: rgba(12, 2, 26, 0.85);
+            border: 1px solid var(--theme-bg-tint);
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 14px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calc-btn:hover {
+            background: var(--theme-btn-bg);
+            border-color: var(--theme-color);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dynamic Backgrounds -->
+    <canvas id="bg-canvas"></canvas>
+    <div id="bg-pattern"></div>
+
+    <div class="main-wrapper">
+        <img id="site-title-img" src="purpletitle.png" alt="Vengeance">
+        
+        <!-- Navigation Buttons -->
+        <div class="nav-buttons-container">
+            <button class="nav-square-btn active" id="btn-games" onclick="switchTab('games')">
+                <img src="games.png" alt="Games" class="nav-btn-icon" onerror="this.src='favicon.png'">
+                Games
+            </button>
+            <button class="nav-square-btn" id="btn-movies" onclick="switchTab('movies')">
+                <img src="movies.png" alt="Movies" class="nav-btn-icon" onerror="this.src='favicon.png'">
+                Movies
+            </button>
+            <button class="nav-square-btn" id="btn-music" onclick="switchTab('music')">
+                <img src="music.png" alt="Music" class="nav-btn-icon" onerror="this.src='favicon.png'">
+                Music
+            </button>
+            <button class="nav-square-btn" id="btn-ai" onclick="switchTab('ai')">
+                <img src="ai.png" alt="AI" class="nav-btn-icon" onerror="this.src='favicon.png'">
+                AI
+            </button>
+            <button class="nav-square-btn" id="btn-codespace" onclick="switchTab('codespace')">
+                <img src="codespace.png" alt="Codespace" class="nav-btn-icon" onerror="this.src='favicon.png'">
+                Codespace
+            </button>
+            <button class="nav-square-btn" id="btn-tools" onclick="switchTab('tools')">
+                <img src="tools.png" alt="Tools" class="nav-btn-icon" onerror="this.src='favicon.png'">
+                Tools
+            </button>
+            <button class="nav-square-btn" id="btn-anime" onclick="switchTab('anime')">
+                <img src="anime.png" alt="Anime" class="nav-btn-icon" onerror="this.src='favicon.png'">
+                Anime
+            </button>
+            <button class="nav-square-btn" id="btn-info" onclick="switchTab('info')">
+                <img src="info.png" alt="Info" class="nav-btn-icon" onerror="this.src='favicon.png'">
+                Info
+            </button>
+            <button class="nav-square-btn" id="btn-settings" onclick="switchTab('settings')">
+                <img src="settings.png" alt="Settings" class="nav-btn-icon" onerror="this.src='favicon.png'">
+                Settings
+            </button>
+        </div>
+
+        <!-- GAMES SCREEN -->
+        <div id="panel-games" class="view-panel active">
+            <div class="search-container">
+                <input type="text" id="search-input" class="search-input" placeholder="Search GN-Math games..." oninput="handleGamesSearchInput()" autocomplete="off">
+            </div>
+
+            <!-- LARGE BANNER ABOVE GAMES -->
+            <div class="games-banner-container" id="featured-games-banner">
+                <div class="banner-header">
+                    <div class="banner-tag">SUGGESTED GAMES</div>
+                </div>
+                <div class="banner-single-wrapper">
+                    <button class="banner-arrow-btn" onclick="cycleBannerGame(-1)" title="Previous Game">❮</button>
+                    
+                    <div class="banner-single-card" id="banner-current-card" onclick="launchCurrentBannerGame()">
+                        <img id="banner-game-img" src="" alt="Suggested Game" onerror="this.src='favicon.png'">
+                        <div class="banner-single-info">
+                            <div class="banner-single-title" id="banner-game-title">Loading...</div>
+                            <div class="banner-play-hint">Click to Play Now</div>
+                        </div>
+                    </div>
+
+                    <button class="banner-arrow-btn" onclick="cycleBannerGame(1)" title="Next Game">❯</button>
+                </div>
+                <div class="banner-dots-container" id="banner-dots-wrapper"></div>
+            </div>
+
+            <div id="games-grid" class="games-grid">
+                <div class="status-msg">INITIALIZING GN-MATH GAMES REPOSITORY...</div>
+            </div>
+        </div>
+
+        <!-- MOVIES SCREEN -->
+        <div id="panel-movies" class="view-panel">
+            <div class="search-container">
+                <input type="text" id="movie-search-input" class="search-input" placeholder="Search movies..." oninput="filterMoviesLive()" autocomplete="off">
+            </div>
+
+            <div class="movie-carousel-wrapper">
+                <div class="movie-controls-bar">
+                    <button class="movie-nav-btn" onclick="cycleMovie(-1)" title="Previous Movie">❮</button>
+                    
+                    <button class="movie-center-btn" id="movie-play-btn" onclick="launchCurrentFeaturedMovie()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <span id="movie-play-btn-text">Watch Movie</span>
+                    </button>
+
+                    <button class="movie-nav-btn" onclick="cycleMovie(1)" title="Next Movie">❯</button>
+                </div>
+
+                <div class="movie-showcase-display" onclick="launchCurrentFeaturedMovie()">
+                    <div class="movie-showcase-img-container">
+                        <img id="featured-movie-img" src="minecraftmovie.png" alt="Featured Movie" onerror="this.src='favicon.png'">
+                    </div>
+                    <div class="movie-showcase-footer">
+                        <div class="movie-showcase-title" id="featured-movie-title">A Minecraft Movie</div>
+                        <div class="movie-counter-tag" id="featured-movie-counter">1 / 50</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MUSIC SCREEN -->
+        <div id="panel-music" class="view-panel">
+            <div id="music-list-view" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                <div class="search-container">
+                    <input type="text" id="music-search-input" class="search-input" placeholder="Search music library..." oninput="filterMusic()" autocomplete="off">
+                </div>
+                <div id="music-list-wrapper" class="music-list-container"></div>
+            </div>
+
+            <div id="music-player-view" style="width: 100%; display: none; flex-direction: column; align-items: center;">
+                <div style="width: 100%; max-width: 950px; margin-bottom: 15px; display: flex; justify-content: flex-start;">
+                    <button class="settings-btn" onclick="exitMusicPlayer()">← Back to Library</button>
+                </div>
+
+                <div class="music-player-card">
+                    <div class="music-player-body">
+                        <img id="music-current-art" class="music-main-art" src="" alt="Cover Art">
+                        
+                        <div class="music-info-side">
+                            <div id="music-current-title" class="music-now-title">Song Title</div>
+                            <iframe id="music-drive-frame" class="music-drive-preview-frame" allow="autoplay"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       <!-- AI SCREEN -->
+<div id="panel-ai" class="view-panel">
+    <div class="ai-chat-card">
+        <div class="ai-chat-header">
+            <div class="ai-status-indicator">
+                <div class="ai-status-dot"></div>
+                <span>VENGEANCE AI (BOTPRESS)</span>
+            </div>
+        </div>
+        <iframe 
+            id="ai-botpress-iframe" 
+            class="ai-iframe-viewport" 
+            src="https://cdn.botpress.cloud/webchat/v3.7/shareable.html?configUrl=https://files.bpcontent.cloud/2026/09/08/20/20260908204737-HKW6757H.json"
+            allow="microphone; camera; clipboard-read; clipboard-write">
+        </iframe>
+    </div>
+</div>
+
+        <!-- CODESPACE SCREEN -->
+        <div id="panel-codespace" class="view-panel">
+            <iframe id="codespace-frame-viewport" class="codespace-frame-viewport" src="codespace.html" allow="autoplay; fullscreen; clipboard-read; clipboard-write"></iframe>
+        </div>
+
+        <!-- TOOLS SCREEN -->
+        <div id="panel-tools" class="view-panel">
+            <div class="settings-container">
+                <!-- Base64 Converter -->
+                <div class="settings-card">
+                    <div class="settings-card-title">Base64 Encoder / Decoder</div>
+                    <textarea id="tool-base64-input" class="settings-input" style="height: 70px; resize: vertical;" placeholder="Enter text here..."></textarea>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="settings-btn" onclick="toolBase64('encode')" style="flex: 1;">Encode</button>
+                        <button class="settings-btn" onclick="toolBase64('decode')" style="flex: 1;">Decode</button>
+                    </div>
+                    <textarea id="tool-base64-output" class="settings-input" style="height: 70px; resize: vertical;" placeholder="Result..." readonly></textarea>
+                </div>
+
+                <!-- URL Encoder -->
+                <div class="settings-card">
+                    <div class="settings-card-title">URL Encoder / Decoder</div>
+                    <textarea id="tool-url-input" class="settings-input" style="height: 70px; resize: vertical;" placeholder="Enter URL or text..."></textarea>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="settings-btn" onclick="toolURL('encode')" style="flex: 1;">Encode URL</button>
+                        <button class="settings-btn" onclick="toolURL('decode')" style="flex: 1;">Decode URL</button>
+                    </div>
+                    <textarea id="tool-url-output" class="settings-input" style="height: 70px; resize: vertical;" placeholder="Result..." readonly></textarea>
+                </div>
+
+                <!-- JSON Validator & Formatter -->
+                <div class="settings-card">
+                    <div class="settings-card-title">JSON Formatter / Validator</div>
+                    <textarea id="tool-json-input" class="settings-input" style="height: 90px; resize: vertical;" placeholder='Enter unformatted JSON (e.g. {"test": 1})...'></textarea>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="settings-btn" onclick="toolJSONFormat()" style="flex: 1;">Format / Prettify</button>
+                        <button class="settings-btn" onclick="toolJSONMinify()" style="flex: 1;">Minify</button>
+                    </div>
+                    <textarea id="tool-json-output" class="settings-input" style="height: 90px; resize: vertical;" placeholder="Formatted result..." readonly></textarea>
+                </div>
+
+                <!-- Hash Generator -->
+                <div class="settings-card">
+                    <div class="settings-card-title">Hash Generator (SHA-256)</div>
+                    <input type="text" id="tool-hash-input" class="settings-input" placeholder="Enter string to hash...">
+                    <button class="settings-btn" onclick="toolGenerateHash()">Compute SHA-256 Hash</button>
+                    <input type="text" id="tool-hash-output" class="settings-input" placeholder="Computed hash..." readonly>
+                </div>
+
+                <!-- TimeStamp Converter -->
+                <div class="settings-card">
+                    <div class="settings-card-title">Unix Timestamp Converter</div>
+                    <div class="settings-field-group">
+                        <label class="settings-label">Current Epoch Timestamp:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="tool-current-timestamp" class="settings-input" readonly>
+                            <button class="settings-btn" onclick="toolUpdateTimestamp()">Refresh</button>
+                        </div>
+                    </div>
+                    <div class="settings-field-group" style="margin-top: 10px;">
+                        <label class="settings-label">Timestamp to Date:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="tool-ts-input" class="settings-input" placeholder="Enter epoch ms or s...">
+                            <button class="settings-btn" onclick="toolConvertTimestamp()">Convert</button>
+                        </div>
+                        <input type="text" id="tool-ts-output" class="settings-input" placeholder="Converted date string..." readonly>
+                    </div>
+                </div>
+
+                <!-- Calculator -->
+                <div class="settings-card">
+                    <div class="settings-card-title">Calculator</div>
+                    <input type="text" id="calc-display" class="settings-input" style="text-align: right; font-size: 1.4rem;" value="0" readonly>
+                    <div class="calc-grid">
+                        <button class="calc-btn" onclick="calcClear()">C</button>
+                        <button class="calc-btn" onclick="calcInput('(')">(</button>
+                        <button class="calc-btn" onclick="calcInput(')')">)</button>
+                        <button class="calc-btn" onclick="calcInput('/')">÷</button>
+
+                        <button class="calc-btn" onclick="calcInput('7')">7</button>
+                        <button class="calc-btn" onclick="calcInput('8')">8</button>
+                        <button class="calc-btn" onclick="calcInput('9')">9</button>
+                        <button class="calc-btn" onclick="calcInput('*')">×</button>
+
+                        <button class="calc-btn" onclick="calcInput('4')">4</button>
+                        <button class="calc-btn" onclick="calcInput('5')">5</button>
+                        <button class="calc-btn" onclick="calcInput('6')">6</button>
+                        <button class="calc-btn" onclick="calcInput('-')">-</button>
+
+                        <button class="calc-btn" onclick="calcInput('1')">1</button>
+                        <button class="calc-btn" onclick="calcInput('2')">2</button>
+                        <button class="calc-btn" onclick="calcInput('3')">3</button>
+                        <button class="calc-btn" onclick="calcInput('+')">+</button>
+
+                        <button class="calc-btn" onclick="calcInput('0')">0</button>
+                        <button class="calc-btn" onclick="calcInput('.')">.</button>
+                        <button class="calc-btn" onclick="calcBackspace()">⌫</button>
+                        <button class="calc-btn" style="background: var(--theme-btn-bg); font-weight: bold;" onclick="calcEvaluate()">=</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANIME SCREEN -->
+        <div id="panel-anime" class="view-panel">
+            <!-- Anime Showcase (Movies Carousel style) -->
+            <div id="anime-carousel-view" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                <div class="search-container">
+                    <input type="text" id="anime-search-input" class="search-input" placeholder="Search anime series..." oninput="filterAnimeLive()" autocomplete="off">
+                </div>
+
+                <div class="movie-carousel-wrapper">
+                    <div class="movie-controls-bar">
+                        <button class="movie-nav-btn" onclick="cycleAnime(-1)" title="Previous Anime">❮</button>
+                        
+                        <button class="movie-center-btn" id="anime-select-btn" onclick="openSelectedAnimeEpisodeList()">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+                            <span id="anime-select-btn-text">View Episodes</span>
+                        </button>
+
+                        <button class="movie-nav-btn" onclick="cycleAnime(1)" title="Next Anime">❯</button>
+                    </div>
+
+                    <div class="movie-showcase-display" onclick="openSelectedAnimeEpisodeList()">
+                        <div class="movie-showcase-img-container">
+                            <img id="featured-anime-img" src="" alt="Anime Series" onerror="this.src='favicon.png'">
+                        </div>
+                        <div class="movie-showcase-footer">
+                            <div class="movie-showcase-title" id="featured-anime-title">Anime Title</div>
+                            <div class="movie-counter-tag" id="featured-anime-counter">1 / 1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Anime Episodes List (Revealed when card/button pressed) -->
+            <div id="anime-episodes-view" style="width: 100%; display: none; flex-direction: column; align-items: center;">
+                <div style="width: 100%; max-width: 1100px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <button class="settings-btn" onclick="closeAnimeEpisodesView()">← Back to Anime Carousel</button>
+                    <div id="anime-episodes-header-title" style="font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 900; text-transform: uppercase;">Episodes</div>
+                </div>
+                <div id="anime-episodes-list" class="music-list-container"></div>
+            </div>
+        </div>
+
+        <!-- INFO SCREEN -->
+        <div id="panel-info" class="view-panel">
+            <div class="settings-container">
+                <div class="settings-card">
+                    <div class="settings-card-title">Information & Resources</div>
+                    <div class="info-button-group">
+                        <button class="info-action-btn" onclick="switchTab('terms')">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                            </svg>
+                            Terms of Use
+                        </button>
+                        <button class="info-action-btn" onclick="switchTab('credit')">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                            </svg>
+                            Credit
+                        </button>
+                        <button class="info-action-btn" onclick="switchTab('privacy')">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+                            </svg>
+                            Privacy Policy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TERMS OF USE SCREEN -->
+        <div id="panel-terms" class="view-panel">
+            <div class="settings-container">
+                <div class="settings-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--theme-bg-tint); padding-bottom: 10px;">
+                        <div class="settings-card-title" style="border: none; padding: 0;">Terms of Use</div>
+                        <button class="settings-btn" onclick="switchTab('info')" style="padding: 6px 14px; font-size: 0.8rem;">← Back to Info</button>
+                    </div>
+                    <div class="info-content-box">Vengeance is for entertainment purposes only. If you are under the age of 13 it is suggested, you have parent/guardian permission to be using this site. While viewers are important to us, we do not have to delete anything that may seem unfit for you. We do not guarantee this will fully meet your expectations because of firewall, security, custom features, blockers, or personal opinion. You understand you have permission to download and copy this code and recreate it to make your own sites and to make your own URLs but not allowed to claim ownership of this site. You understand we do not support copyright directly. You will not share this site with parents, teachers, school administrators, blockers, social media platforms (TikTok, Discord, YouTube, etc) untrustworthy students/friends, known teacher's pets, enemies/competitors to the creators, your local judicial system, children under the age of 8, and/or people who don't fully understand the UBG network unless given the creators direct permission. Please finish all work in home/school before using this site.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CREDIT SCREEN -->
+        <div id="panel-credit" class="view-panel">
+            <div class="settings-container">
+                <div class="settings-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--theme-bg-tint); padding-bottom: 10px;">
+                        <div class="settings-card-title" style="border: none; padding: 0;">Credits</div>
+                        <button class="settings-btn" onclick="switchTab('info')" style="padding: 6px 14px; font-size: 0.8rem;">← Back to Info</button>
+                    </div>
+                    <div class="info-content-box">Creator - Encrypted
+Games - GN-Math
+Movies - Universal Movies
+Music - Universal Movies
+AI - Botpress
+Anime - Universal Movies
+AI used to code - Google Gemini</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRIVACY POLICY SCREEN -->
+        <div id="panel-privacy" class="view-panel">
+            <div class="settings-container">
+                <div class="settings-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--theme-bg-tint); padding-bottom: 10px;">
+                        <div class="settings-card-title" style="border: none; padding: 0;">Privacy Policy</div>
+                        <button class="settings-btn" onclick="switchTab('info')" style="padding: 6px 14px; font-size: 0.8rem;">← Back to Info</button>
+                    </div>
+                    <div class="info-content-box">Vengeance has no connections whatsoever with any third-party organizations. Your activity will not be recorded at all however your data will be saved for so you can leave off the way it was last time. Vengeance will not ask you to give away any personal information including your name, phone number, location, age, gender, race, or nationality. We do not guarantee our games, or AI will not ask you for it because we did not create them. None of your information you say to an AI or game will be recorded by us</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETTINGS SCREEN -->
+        <div id="panel-settings" class="view-panel">
+            <div class="settings-container">
+                <div class="settings-card">
+                    <div class="settings-card-title">Theme Color</div>
+                    <div class="settings-field-group">
+                        <label class="settings-label">Select Color Palette:</label>
+                        <select id="theme-select" class="settings-select" onchange="changeTheme(this.value)">
+                            <option value="purple" selected>Purple</option>
+                            <option value="red">Red</option>
+                            <option value="orange">Orange</option>
+                            <option value="yellow">Yellow</option>
+                            <option value="green">Green</option>
+                            <option value="blue">Blue</option>
+                            <option value="cyan">Cyan</option>
+                            <option value="white">White</option>
+                            <option value="brown">Brown</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="settings-card-title">Tab Cloaking</div>
+                    <div class="settings-field-group">
+                        <label class="settings-label">Preset Cloaks:</label>
+                        <select id="cloak-preset-select" class="settings-select" onchange="applyPresetCloak(this.value)">
+                            <option value="none">Default (Vengeance)</option>
+                            <option value="docs">Google Docs</option>
+                            <option value="drive">Google Drive</option>
+                            <option value="wikipedia">Wikipedia</option>
+                            <option value="canva">Canva</option>
+                            <option value="youtube">YouTube</option>
+                            <option value="github">GitHub</option>
+                            <option value="ixl">IXL Learning</option>
+                            <option value="canvas">Canvas LMS</option>
+                        </select>
+                    </div>
+                    <div class="settings-field-group" style="margin-top: 10px;">
+                        <label class="settings-label">Custom Cloak Name:</label>
+                        <input type="text" id="custom-cloak-name" class="settings-input" placeholder="Custom page title...">
+                    </div>
+                    <div class="settings-field-group">
+                        <label class="settings-label">Custom Favicon URL or Site URL:</label>
+                        <input type="text" id="custom-cloak-favicon" class="settings-input" placeholder="https://example.com or image URL...">
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 5px;">
+                        <button class="settings-btn" onclick="applyCustomCloak()" style="flex: 1;">Apply Custom Cloak</button>
+                        <button class="settings-btn" onclick="resetCloak()" style="background: rgba(255,255,255,0.1);">Reset</button>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="settings-card-title">Panic Button</div>
+                    <div class="settings-field-group">
+                        <label class="settings-label">Panic Key Trigger:</label>
+                        <button class="settings-btn" id="panic-key-btn" onclick="bindPanicKey()" style="text-align: center;">Press to Bind Key (Current: `)</button>
+                    </div>
+                    <div class="settings-field-group">
+                        <label class="settings-label">Redirect Destination URL:</label>
+                        <input type="text" id="panic-redirect-url" class="settings-input" value="https://www.google.com" placeholder="https://google.com">
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="settings-card-title">Background Style</div>
+                    <div class="settings-field-group">
+                        <label class="settings-label">Choose Background:</label>
+                        <select id="bg-select" class="settings-select" onchange="changeBackground(this.value)">
+                            <option value="constellation" selected>Constellation</option>
+                            <option value="solid">Solid</option>
+                            <option value="grid">Grid (Visible Lines)</option>
+                            <option value="dots">Dots</option>
+                            <option value="nebula">Nebula</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Overlay -->
+    <div id="media-overlay">
+        <div class="overlay-header">
+            <button class="close-btn" onclick="closeMedia()">← Back</button>
+        </div>
+        <iframe id="media-frame" allow="gamepad; autoplay; fullscreen; cross-origin-isolated; compute-pressure; focus-without-user-activation; screen-wake-lock; clipboard-read; clipboard-write; keyboard-map; accelerometer; gyroscope; payment; xr-spatial-tracking" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
+    </div>
+
+    <script>
+        /* ================= THEMES CONFIGURATION ================= */
+        const themes = {
+            purple: {
+                color: "#a855f7",
+                glow: "#9333ea",
+                light: "#d8b4fe",
+                bgTint: "rgba(168, 85, 247, 0.4)",
+                activeBg: "rgba(147, 51, 234, 0.25)",
+                btnBg: "#9333ea",
+                btnHover: "#a855f7",
+                btnDisabled: "#4a2068",
+                titleImg: "purpletitle.png"
+            },
+            red: {
+                color: "#ef4444",
+                glow: "#dc2626",
+                light: "#fca5a5",
+                bgTint: "rgba(239, 68, 68, 0.4)",
+                activeBg: "rgba(220, 38, 38, 0.25)",
+                btnBg: "#dc2626",
+                btnHover: "#ef4444",
+                btnDisabled: "#581c1c",
+                titleImg: "redtitle.png"
+            },
+            orange: {
+                color: "#f97316",
+                glow: "#ea580c",
+                light: "#fdba74",
+                bgTint: "rgba(249, 115, 22, 0.4)",
+                activeBg: "rgba(234, 88, 12, 0.25)",
+                btnBg: "#ea580c",
+                btnHover: "#f97316",
+                btnDisabled: "#5c2409",
+                titleImg: "orangetitle.png"
+            },
+            yellow: {
+                color: "#eab308",
+                glow: "#ca8a04",
+                light: "#fde047",
+                bgTint: "rgba(234, 179, 8, 0.4)",
+                activeBg: "rgba(202, 138, 4, 0.25)",
+                btnBg: "#ca8a04",
+                btnHover: "#eab308",
+                btnDisabled: "#543803",
+                titleImg: "yellowtitle.png"
+            },
+            green: {
+                color: "#22c55e",
+                glow: "#16a34a",
+                light: "#86efac",
+                bgTint: "rgba(34, 197, 94, 0.4)",
+                activeBg: "rgba(34, 197, 94, 0.25)",
+                btnBg: "#16a34a",
+                btnHover: "#22c55e",
+                btnDisabled: "#144222",
+                titleImg: "greentitle.png"
+            },
+            blue: {
+                color: "#3b82f6",
+                glow: "#2563eb",
+                light: "#93c5fd",
+                bgTint: "rgba(59, 130, 246, 0.4)",
+                activeBg: "rgba(37, 99, 235, 0.25)",
+                btnBg: "#2563eb",
+                btnHover: "#3b82f6",
+                btnDisabled: "#172b5c",
+                titleImg: "bluetitle.png"
+            },
+            cyan: {
+                color: "#06b6d4",
+                glow: "#0891b2",
+                light: "#67e8f9",
+                bgTint: "rgba(6, 182, 212, 0.4)",
+                activeBg: "rgba(8, 145, 178, 0.25)",
+                btnBg: "#0891b2",
+                btnHover: "#06b6d4",
+                btnDisabled: "#13424d",
+                titleImg: "cyantitle.png"
+            },
+            white: {
+                color: "#f8fafc",
+                glow: "#cbd5e1",
+                light: "#ffffff",
+                bgTint: "rgba(255, 255, 255, 0.4)",
+                activeBg: "rgba(255, 255, 255, 0.2)",
+                btnBg: "#94a3b8",
+                btnHover: "#cbd5e1",
+                btnDisabled: "#334155",
+                titleImg: "whitetitle.png"
+            },
+            brown: {
+                color: "#a16207",
+                glow: "#78350f",
+                light: "#d97706",
+                bgTint: "rgba(161, 98, 7, 0.4)",
+                activeBg: "rgba(120, 53, 15, 0.25)",
+                btnBg: "#78350f",
+                btnHover: "#a16207",
+                btnDisabled: "#3d1b08",
+                titleImg: "browntitle.png"
+            }
+        };
+
+        function changeTheme(themeKey) {
+            const t = themes[themeKey] || themes.purple;
+            const root = document.documentElement;
+            root.style.setProperty('--theme-color', t.color);
+            root.style.setProperty('--theme-glow', t.glow);
+            root.style.setProperty('--theme-light', t.light);
+            root.style.setProperty('--theme-bg-tint', t.bgTint);
+            root.style.setProperty('--theme-active-bg', t.activeBg);
+            root.style.setProperty('--theme-btn-bg', t.btnBg);
+            root.style.setProperty('--theme-btn-hover', t.btnHover);
+            root.style.setProperty('--theme-btn-disabled', t.btnDisabled);
+
+            const titleImg = document.getElementById('site-title-img');
+            if (titleImg) {
+                titleImg.src = t.titleImg;
+            }
+            localStorage.setItem('v_theme', themeKey);
+        }
+
+        /* ================= SUGGESTED GAMES BANNER ENGINE ================= */
+        const featuredBannerGames = [
+            {
+                name: "Geometry Dash",
+                aliases: ["geometry dash", "geometrydash"],
+                fallbackCover: "https://cdn.jsdelivr.net/gh/freebuisness/covers@main/geometrydash.png",
+                fallbackUrl: "geometrydash/index.html"
+            },
+            {
+                name: "Baldi's Basics",
+                aliases: ["baldi's basics", "baldis basics", "baldi"],
+                fallbackCover: "https://cdn.jsdelivr.net/gh/freebuisness/covers@main/baldisbasics.png",
+                fallbackUrl: "baldisbasics/index.html"
+            },
+            {
+                name: "Ragdoll Archers",
+                aliases: ["ragdoll archers", "ragdollarchers"],
+                fallbackCover: "https://cdn.jsdelivr.net/gh/freebuisness/covers@main/ragdollarchers.png",
+                fallbackUrl: "ragdollarchers/index.html"
+            },
+            {
+                name: "Snow Rider 3D",
+                aliases: ["snow rider 3d", "snow rider", "snowrider3d"],
+                fallbackCover: "https://cdn.jsdelivr.net/gh/freebuisness/covers@main/snowrider3d.png",
+                fallbackUrl: "snowrider3d/index.html"
+            },
+            {
+                name: "Anton Blast",
+                aliases: ["anton blast", "antonblast"],
+                fallbackCover: "https://cdn.jsdelivr.net/gh/freebuisness/covers@main/antonblast.png",
+                fallbackUrl: "antonblast/index.html"
+            },
+            {
+                name: "2048",
+                aliases: ["2048"],
+                fallbackCover: "https://cdn.jsdelivr.net/gh/freebuisness/covers@main/2048.png",
+                fallbackUrl: "2048/index.html"
+            },
+            {
+                name: "FNAF",
+                aliases: ["fnaf", "five nights at freddy's", "five nights at freddys", "fnaf 1"],
+                fallbackCover: "https://cdn.jsdelivr.net/gh/freebuisness/covers@main/fnaf.png",
+                fallbackUrl: "fnaf/index.html"
+            },
+            {
+                name: "OvO",
+                aliases: ["ovo", "ovo dimension"],
+                fallbackCover: "https://cdn.jsdelivr.net/gh/freebuisness/covers@main/ovo.png",
+                fallbackUrl: "ovo/index.html"
+            }
+        ];
+
+        let currentBannerIndex = 0;
+
+        function getBannerGameData(index) {
+            const item = featuredBannerGames[index];
+            const matchedGame = cachedGames.find(g => {
+                if (!g || !g.name) return false;
+                const lower = g.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                return item.aliases.some(alias => {
+                    const normAlias = alias.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    return lower === normAlias || lower.includes(normAlias);
+                });
+            });
+
+            if (matchedGame) {
+                const coverSrc = matchedGame.cover 
+                    ? matchedGame.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL) 
+                    : item.fallbackCover;
+                return {
+                    name: item.name,
+                    cover: coverSrc,
+                    gameObj: matchedGame
+                };
+            }
+
+            return {
+                name: item.name,
+                cover: item.fallbackCover,
+                gameObj: { name: item.name, url: item.fallbackUrl }
+            };
+        }
+
+        function renderBannerDots() {
+            const dotsWrapper = document.getElementById('banner-dots-wrapper');
+            if (!dotsWrapper) return;
+            dotsWrapper.innerHTML = '';
+
+            featuredBannerGames.forEach((_, idx) => {
+                const dot = document.createElement('div');
+                dot.className = `banner-dot ${idx === currentBannerIndex ? 'active' : ''}`;
+                dot.onclick = () => {
+                    currentBannerIndex = idx;
+                    updateFeaturedBanner();
+                };
+                dotsWrapper.appendChild(dot);
+            });
+        }
+
+        function updateFeaturedBanner() {
+            if (featuredBannerGames.length === 0) return;
+            if (currentBannerIndex >= featuredBannerGames.length) currentBannerIndex = 0;
+            if (currentBannerIndex < 0) currentBannerIndex = featuredBannerGames.length - 1;
+
+            const data = getBannerGameData(currentBannerIndex);
+            const imgElem = document.getElementById('banner-game-img');
+            const titleElem = document.getElementById('banner-game-title');
+
+            if (imgElem) imgElem.src = data.cover;
+            if (titleElem) titleElem.textContent = data.name;
+
+            renderBannerDots();
+        }
+
+        function cycleBannerGame(direction) {
+            currentBannerIndex += direction;
+            updateFeaturedBanner();
+        }
+
+        function launchCurrentBannerGame() {
+            const data = getBannerGameData(currentBannerIndex);
+            launchGNMathGame(data.gameObj);
+        }
+
+        function handleGamesSearchInput() {
+            const inputVal = document.getElementById('search-input').value;
+            const banner = document.getElementById('featured-games-banner');
+            
+            if (banner) {
+                if (inputVal.trim().length > 0) {
+                    banner.style.display = 'none';
+                } else {
+                    banner.style.display = 'flex';
+                }
+            }
+            filterGames();
+        }
+
+        /* ================= MOVIES DATA & CAROUSEL ================= */
+        const moviesList = [
+            { title: "A Minecraft Movie", img: "minecraftmovie.png", url: "https://drive.google.com/file/d/1FHBn4bOQAAK7eDos_yRqYdtKhgm6uEXl/preview" },
+            { title: "K-Pop Demon Hunters", img: "kpopdemonhunters.png", url: "https://drive.google.com/file/d/1zT4SAUoKx29aoNVS3scuTMvTqyNgMQ7E/preview" },
+            { title: "The Bad Guys 2", img: "thebadguys2.png", url: "https://drive.google.com/file/d/1r1PiMr2DgOEf-jl4j-QH-nS3m4UWFven/preview" },
+            { title: "Backrooms", img: "backrooms.png", url: "https://drive.google.com/file/d/18nLws3FusSwXgQxTmAv-JmQijlCytXzD/preview" },
+            { title: "Avatar Fire and Ash", img: "avatarfireandash.png", url: "https://drive.google.com/file/d/1EcDr9ozRW9EY4PGfYX78bBhbuw8-BMbP/preview" },
+            { title: "Toy Story 5", img: "toystory5.png", url: "https://drive.google.com/file/d/1ubdX6AHmMzsPEZpq0_W3k7cQVS_yCtJI/preview" },
+            { title: "Zootopia 2", img: "zootopia2.png", url: "https://drive.google.com/file/d/10lys4xAmzALt_F081ej_9oP3i7Lm1Qgq/preview" },
+            { title: "Five nights at freddy's", img: "fivenightsatfreddys.png", url: "https://drive.google.com/file/d/1OyO1OdhtfwR883Uvi0QPP5iooGcxTVSY/preview" },
+            { title: "Five nights at freddy's 2", img: "fivenightsatfreddys2.png", url: "https://drive.google.com/file/d/1dW1XsOWtiL0mGHOFIB8n0rEhLPoa2buJ/preview" },
+            { title: "Aang the last airbender", img: "aang.png", url: "https://drive.google.com/file/d/1Xvbri_BQ3g45rSElQgS4-EomFjE5nZc9/preview" },
+            { title: "Interstellar", img: "interstellar.png", url: "https://drive.google.com/file/d/1r4A2MRDGCZ6XORF0mMLvJaDK9L_C9gjO/preview" },
+            { title: "Superman", img: "superman.png", url: "https://drive.google.com/file/d/1nO646VaJQBN725tPVe9TLFnLBFPJ-jbL/preview" },
+            { title: "Hoppers", img: "hoppers.png", url: "https://drive.google.com/file/d/1KZXO41euPYWogmzwSjvSBPaBKX1xwfZb/preview" },
+            { title: "Mortal Kombat 2", img: "mortalkombat2.png", url: "https://drive.google.com/file/d/1DYP51mxiszQAlgUAIepXVm95dlA9kjat/preview" },
+            { title: "Deadpool & Wolverine", img: "deadpoolandwolverine.png", url: "https://drive.google.com/file/d/1aBzsoTJAjhZeFFDkIV2SN7p7ZHagUEDc/preview" },
+            { title: "The mario galaxy movie", img: "mariogalaxy.png", url: "https://drive.google.com/file/d/1uwKkyiuRNh9K_3y2GyIv7OJGDPtHdinY/preview" },
+            { title: "Despicable Me 4", img: "despicableme4.png", url: "https://drive.google.com/file/d/1siki1wYP3LpfjFpUT8Z9lJuJzl7MdBhX/preview" },
+            { title: "D&D: Honor among theives", img: "dungeonsanddragons.png", url: "https://drive.google.com/file/d/1iX6QbaV3Oi_yGDvqRcFvrJ4_gzIOisnT/preview" },
+            { title: "Home Alone", img: "homealone.png", url: "https://drive.google.com/file/d/18YKNCTokG3B7ZWzCE3thunyDJMktLxnm/preview" },
+            { title: "Inside Out 2", img: "insideout2.png", url: "https://drive.google.com/file/d/1SABVZNMwHTME4hsFwL9IWyWZPKDTBSoT/preview" },
+            { title: "It", img: "it.png", url: "https://drive.google.com/file/d/1BhQDbp8lXDwS-Q-pq4axufeZI-5TklpR/preview" },
+            { title: "Oppenheimer", img: "oppenheimer.png", url: "https://drive.google.com/file/d/1GLqywDPqfZSLmLAiKC8j2l0o52cAGP8S/preview" },
+            { title: "Red One", img: "redone.png", url: "https://drive.google.com/file/d/1QQx9ogqUJzS3G8GIZXLBAhgx2s2Ol2zZ/preview" },
+            { title: "Scream VI", img: "scream6.png", url: "https://drive.google.com/file/d/1zLFZE5jEzvjRSAawv9gOk-E5FYhsYblJ/preview" },
+            { title: "Spider man homecoming", img: "spiderman.png", url: "https://drive.google.com/file/d/1I9PYrrRLo1m_5Wtfq59L6gHGa3NaUXDv/preview" },
+            { title: "Sonic the hedgehog 2", img: "sonic2.png", url: "https://drive.google.com/file/d/13YPdlfR1BTzXfqwmfbzfiuPycjQsh0Yb/preview" },
+            { title: "Transformers One", img: "transformersone.png", url: "https://drive.google.com/file/d/1cD5AaH1qXrA3CdlyD6lEJIfspu4FDOD-/preview" },
+            { title: "The Garfield Movie", img: "thegarfieldmovie.png", url: "https://drive.google.com/file/d/1W0OfyIS_7f0DKjC6x1bVLI4WBFabZXis/preview" },
+            { title: "Venom", img: "venom.png", url: "https://drive.google.com/file/d/1XoN0B1rsNKDDRphmI8bM606r4wRQ6JUH/preview" },
+            { title: "The Devil wears prada 2", img: "thedevilwearsprada.png", url: "https://drive.google.com/file/d/1-51-aJwdj-Lr4QbA8gD9nvJXNfq0mIAZ/preview" },
+            { title: "Minions and Monsters", img: "minionsandmonsters.png", url: "https://drive.google.com/file/d/1yMeQYZLAS9g-UHSrcIgnqFeEkRowcKoS/preview" },
+            { title: "Supergirl", img: "supergirl.png", url: "https://drive.google.com/file/d/1xImTiJvYDMzbkOMl8jsw7_HG2ekNxfbu/preview" },
+            { title: "Michael", img: "michael.png", url: "https://drive.google.com/file/d/18qk9zJb37v4gF023ll__Jx_eVVA2FshZ/preview" },
+            { title: "Star Wars the empire strikes back", img: "starwars.png", url: "https://drive.google.com/file/d/1q0Jof59Il_So2z5Q38ANn55qB2GCpOx3/preview" },
+            { title: "Avengers Endgame", img: "avengers.png", url: "https://drive.google.com/file/d/1UsxNtlBxGFp955GwEB-s8wYJCA6bXt7e/preview" },
+            { title: "Godzilla x Kong new empire", img: "godzillaxkong.png", url: "https://drive.google.com/file/d/1h5vNxBZhabSuZdPvbGcFQN1x-xfURsfO/preview" },
+            { title: "Hotel Transylvania 4", img: "hoteltransyvania.png", url: "https://drive.google.com/file/d/1_Ujbv8ONdcmV8TrYw8WzTwdD93deiiZp/preview" },
+            { title: "Indiana Jones and the Dial of Destiny", img: "indianajones.png", url: "https://drive.google.com/file/d/1BuNmXFmhFBoSKvcnbi5W1_hQkVLTrzwu/preview" },
+            { title: "Kingdom of the Planet of Apes", img: "planetoftheapes.png", url: "https://drive.google.com/file/d/1BuNmXFmhFBoSKvcnbi5W1_hQkVLTrzwu/preview" },
+            { title: "Jurassic World", img: "jurassicworld.png", url: "https://drive.google.com/file/d/1oD0MwA_C9OVb7HeO70m9gAAs-dbm9SJG/preview" },
+            { title: "Fantastic Four", img: "fantasticfour.png", url: "https://drive.google.com/file/d/1cBhl_4yyqtXZXvTMaAsS3zFBC076lHUe/preview" },
+            { title: "Shrek 2", img: "shrek2.png", url: "https://drive.google.com/file/d/1xtr5zFmpt6iD89Tn8VthzEiBij89J9pZ/preview" },
+            { title: "The Lorax", img: "thelorax.png", url: "https://drive.google.com/file/d/1Kl4ieKALPoEYbllsRy7V8AYiPtJATg7W/preview" },
+            { title: "Jaws the Revenge", img: "jaws.png", url: "https://drive.google.com/file/d/1vX-PNgtbaRWw_exdJt_foTjDdWaWAXrP/preview" },
+            { title: "Moana 2", img: "moana2.png", url: "https://drive.google.com/file/d/1iVJq1FsNG577gesP7CaTWPLgdqAtnaEg/preview" },
+            { title: "Detective Pikachu", img: "detectivepikachu.png", url: "https://drive.google.com/file/d/1q5wcbuy536XQKTBAF7ImApMAlNMVHM5T/preview" },
+            { title: "Southpark Bigger, Longer, & Uncut", img: "southpark.png", url: "https://drive.google.com/file/d/1rEPpdSDgrOP_40NQAcHLTD2odQI1ODh5/preview" },
+            { title: "Obsession", img: "obsession.png", url: "https://drive.google.com/file/d/1mBFA9N5xBd4tC4yDtw4agAAQtwiy3T9F/preview" },
+            { title: "Joker Folie à Deux", img: "joker.png", url: "https://drive.google.com/file/d/1SlDocV1E6yLqFA06iVHOK2BVbpoKLdny/preview" }
+        ];
+
+        let activeFilteredMovies = [...moviesList];
+        let currentMovieIndex = 0;
+
+        function updateMovieDisplay() {
+            if (activeFilteredMovies.length === 0) {
+                document.getElementById('featured-movie-title').textContent = "No Movies Found";
+                document.getElementById('featured-movie-img').src = "favicon.png";
+                document.getElementById('featured-movie-counter').textContent = "0 / 0";
+                document.getElementById('movie-play-btn-text').textContent = "Unavailable";
+                return;
+            }
+
+            if (currentMovieIndex >= activeFilteredMovies.length) currentMovieIndex = 0;
+            if (currentMovieIndex < 0) currentMovieIndex = activeFilteredMovies.length - 1;
+
+            const m = activeFilteredMovies[currentMovieIndex];
+            document.getElementById('featured-movie-title').textContent = m.title;
+            document.getElementById('featured-movie-img').src = m.img;
+            document.getElementById('featured-movie-counter').textContent = `${currentMovieIndex + 1} / ${activeFilteredMovies.length}`;
+            document.getElementById('movie-play-btn-text').textContent = `Play: ${m.title}`;
+        }
+
+        function cycleMovie(direction) {
+            currentMovieIndex += direction;
+            updateMovieDisplay();
+        }
+
+        function launchCurrentFeaturedMovie() {
+            if (activeFilteredMovies.length === 0) return;
+            const m = activeFilteredMovies[currentMovieIndex];
+            launchMovie(m.url);
+        }
+
+        function filterMoviesLive() {
+            const query = document.getElementById('movie-search-input').value.toLowerCase().trim();
+            activeFilteredMovies = moviesList.filter(m => m.title.toLowerCase().includes(query));
+            currentMovieIndex = 0;
+            updateMovieDisplay();
+        }
+
+        /* ================= ANIME SERIES DATA ENGINE ================= */
+        const animeList = [
+            {
+                title: "Jujutsu Kaisan",
+                img: "jujutsukaisan.png",
+                episodes: [
+                    { title: "Episode 1 - Ryoumen Sukuna", url: "https://drive.google.com/file/d/1sL97POXWjGwcUTpz6k6v53GZekim3ZYC/preview" },
+                    { title: "Episode 2 - For Myself", url: "https://drive.google.com/file/d/15N8U6H4F3OnL8X4ilcAE4a3LVi9Ybc9y/preview" },
+                    { title: "Episode 3 - Girl of Steel", url: "https://drive.google.com/file/d/1oB5caWvmitWLcpTZsNT5MWA8zsJjBkhu/preview" },
+{ title: "Episode 4 - Curse Womb Must Die", url: "https://drive.google.com/file/d/1JT0NOMNAbHJhxbhSJSusVXILlMrjvQQj/preview" },
+{ title: "Episode 5 - Curse Womb Must Die II", url: "https://drive.google.com/file/d/19fP0nH54ViiGTkygEPunShtWlla7qP4x/preview" },
+{ title: "Episode 6 - After Rain", url: "https://drive.google.com/file/d/1bET8WCuppN0MkyYTU3j0LCaSY1Mct1Lk/preview" },
+{ title: "Episode 7 - Assault", url: "https://drive.google.com/file/d/1ba1cxaxOw77THpFyrAmBbsTiw6gqnDRC/preview" },
+{ title: "Episode 8 - Boredom", url: "https://drive.google.com/file/d/1Z2Vl209fjp69Q-7NLtha6IZCm1YXnXc4/preview" },
+{ title: "Episode 9 - Small Fry and Reverse Retribution", url: "https://drive.google.com/file/d/1MuHJd5uzoHx9HZn6y-dzrLS8en4yhzlj/preview" },
+{ title: "Episode 10 - Idle Transfiguration", url: "https://drive.google.com/file/d/1peWeeFZKA1lhulhkwGQcjAAtlSAuLq0v/preview" },
+{ title: "Episode 11 - Narrow Minded", url: "https://drive.google.com/file/d/1YU54QOMaFYBMV_P1EXXs9N8sg1nO2CEK/preview" },
+{ title: "Episode 12 - To You, Someday", url: "https://drive.google.com/file/d/1rtbcaezTb7tvRhX-tKZip1RAR76CG9hY/preview" },
+{ title: "Episode 13 - Tomorrow", url: "https://drive.google.com/file/d/1rrcmzVuICQX5HHlWjd3gyFJbZuu5or8f/preview" },
+{ title: "Episode 14 - Kyoto Sister School Exchange Event - Group Battle 0", url: "https://drive.google.com/file/d/1GV1r2Igl8J55vjt7q8TtzpN_sxpdbe8g/preview" },
+{ title: "Episode 15 - Kyoto Sister School Exchange Event - Group Battle 1", url: "https://drive.google.com/file/d/1vy8n_sEl_SVYTk2n9Dc5Kdkh2W_L7p-0/preview" },
+{ title: "Episode 16 - Kyoto Sister School Exchange Event - Group Battle 2", url: "https://drive.google.com/file/d/10fevPRmmAFSLEYbpt8-84OxOCQ636ekD/preview" },
+{ title: "Episode 17 - Kyoto Sister School Exchange Event - Group Battle 3", url: "https://drive.google.com/file/d/1zpuUh392mKn95O0Z6erMr9LXhFoDg6rV/preview" },
+{ title: "Episode 18 - Sage", url: "https://drive.google.com/file/d/1DoZqujqah5tX4mMzbtPottT7AOkfuyoH/preview" },
+{ title: "Episode 19 - Black Flash", url: "https://drive.google.com/file/d/1P1zvMn7VbFzRby1mp5zZYOVOGq4MzBIQ/preview" },
+{ title: "Episode 20 - Nonstandard", url: "https://drive.google.com/file/d/1UvteEa7T1Gmc7UNGBmlJeRlFMPKCs6Wg/preview" },
+{ title: "Episode 21 - Jujutsu Koshien", url: "https://drive.google.com/file/d/1PcLTACJkyh9D6pNXaJIVIVzqUTgCtvEw/preview" },
+{ title: "Episode 22 - The Origin of Blind Obedience", url: "https://drive.google.com/file/d/1y0ardCUOwHFYc1if2EnZoy3IgiAFBMrN/preview" },
+{ title: "Episode 23 - The Origin of Blind Obedience II", url: "https://drive.google.com/file/d/1pA8ImCRx0dlpKpfsfwAiIMuTScVEQs_z/preview" },
+{ title: "Episode 24 - Accomplices", url: "https://drive.google.com/file/d/12n5zBtFYc-vdXihunnisCMsRuIz0VwaJ/preview" },
+                ]
+            },
+            {
+                title: "Jujutsu Kaisen",
+                img: "backrooms.png",
+                episodes: [
+                    { title: "Episode 1 - Ryomen Sukuna", url: "https://drive.google.com/file/d/18nLws3FusSwXgQxTmAv-JmQijlCytXzD/preview" },
+                    { title: "Episode 2 - For Myself", url: "https://drive.google.com/file/d/1EcDr9ozRW9EY4PGfYX78bBhbuw8-BMbP/preview" }
+                ]
+            },
+            {
+                title: "Demon Slayer",
+                img: "kpopdemonhunters.png",
+                episodes: [
+                    { title: "Episode 1 - Cruelty", url: "https://drive.google.com/file/d/1ubdX6AHmMzsPEZpq0_W3k7cQVS_yCtJI/preview" },
+                    { title: "Episode 2 - Trainer Sakonji Urokodaki", url: "https://drive.google.com/file/d/10lys4xAmzALt_F081ej_9oP3i7Lm1Qgq/preview" }
+                ]
+            }
+        ];
+
+        let activeFilteredAnime = [...animeList];
+        let currentAnimeIndex = 0;
+
+        function updateAnimeDisplay() {
+            if (activeFilteredAnime.length === 0) {
+                document.getElementById('featured-anime-title').textContent = "No Anime Found";
+                document.getElementById('featured-anime-img').src = "favicon.png";
+                document.getElementById('featured-anime-counter').textContent = "0 / 0";
+                document.getElementById('anime-select-btn-text').textContent = "Unavailable";
+                return;
+            }
+
+            if (currentAnimeIndex >= activeFilteredAnime.length) currentAnimeIndex = 0;
+            if (currentAnimeIndex < 0) currentAnimeIndex = activeFilteredAnime.length - 1;
+
+            const a = activeFilteredAnime[currentAnimeIndex];
+            document.getElementById('featured-anime-title').textContent = a.title;
+            document.getElementById('featured-anime-img').src = a.img;
+            document.getElementById('featured-anime-counter').textContent = `${currentAnimeIndex + 1} / ${activeFilteredAnime.length}`;
+            document.getElementById('anime-select-btn-text').textContent = `View Episodes: ${a.title}`;
+        }
+
+        function cycleAnime(direction) {
+            currentAnimeIndex += direction;
+            updateAnimeDisplay();
+        }
+
+        function filterAnimeLive() {
+            const query = document.getElementById('anime-search-input').value.toLowerCase().trim();
+            activeFilteredAnime = animeList.filter(a => a.title.toLowerCase().includes(query));
+            currentAnimeIndex = 0;
+            updateAnimeDisplay();
+        }
+
+        function openSelectedAnimeEpisodeList() {
+            if (activeFilteredAnime.length === 0) return;
+            const anime = activeFilteredAnime[currentAnimeIndex];
+            
+            document.getElementById('anime-carousel-view').style.display = 'none';
+            document.getElementById('anime-episodes-view').style.display = 'flex';
+            document.getElementById('anime-episodes-header-title').textContent = `${anime.title} - Episodes`;
+
+            const listWrapper = document.getElementById('anime-episodes-list');
+            listWrapper.innerHTML = '';
+
+            anime.episodes.forEach((ep) => {
+                const item = document.createElement('div');
+                item.className = 'music-list-item';
+                item.onclick = () => launchMovie(ep.url);
+
+                item.innerHTML = `
+                    <div class="music-list-left">
+                        <img src="${anime.img}" alt="${ep.title}" class="music-list-thumbnail" onerror="this.src='favicon.png'" loading="lazy">
+                        <span class="music-list-title">${ep.title}</span>
+                    </div>
+                    <div class="music-list-actions">
+                        <button class="music-list-play-btn" onclick="event.stopPropagation(); launchMovie('${ep.url}');">▶ WATCH</button>
+                    </div>
+                `;
+                listWrapper.appendChild(item);
+            });
+        }
+
+        function closeAnimeEpisodesView() {
+            document.getElementById('anime-episodes-view').style.display = 'none';
+            document.getElementById('anime-carousel-view').style.display = 'flex';
+        }
+
+        /* ================= MUSIC PLAYER ENGINE (LIST VIEW) ================= */
+        const musicList = [
+            { title: "Annihilate", img: "annihilate.png", url: "https://drive.google.com/file/d/1-UTz3ulhky7AO-MWZD-tzuUdccqgYl99/preview" },
+            { title: "2 Seater", img: "cherrybomb.png", url: "https://drive.google.com/file/d/1Zh9gsnDASYsgyaW8QRo4XlyZB3g1gu_P/preview" },
+            { title: "10 Fucking Young Perfect", img: "cherrybomb.png", url: "https://drive.google.com/file/d/1lEBd5Nb6StuJhT9dF_BlMIe7DIjzjB1y/preview" },
+            { title: "Blow My Load", img: "cherrybomb.png", url: "https://drive.google.com/file/d/1OyO1OdhtfwR883Uvi0QPP5iooGcxTVSY/preview" },
+            { title: "Buffalo", img: "cherrybomb.png", url: "https://drive.google.com/file/d/1lEBd5Nb6StuJhT9dF_BlMIe7DIjzjB1y/preview" },
+            { title: "Cherry Bomb", img: "cherrybomb.png", url: "https://drive.google.com/file/d/1pzK6GolJF9znpxbhskdvpL49ank-RNWQ/preview" },
+            { title: "Death Camp", img: "cherrybomb.png", url: "https://drive.google.com/file/d/1wl2BuAiT1JCVEJUwA4iexVD0WI_LdfUY/preview" },
+            { title: "Back in Black", img: "backinblack.png", url: "https://drive.google.com/file/d/16hs8KTXdyq2DNK3POIpJBPujYFM03kLZ/preview" },
+            { title: "Business", img: "theeminemshow.png", url: "https://drive.google.com/file/d/1MlmnqQ-fcT7B4O1Fs-Y8Y2CRWGbzHb1m/preview" },
+            { title: "Cleanin' Out My Closet", img: "theeminemshow.png", url: "https://drive.google.com/file/d/14oLNquXsSfyE_rtqv_nkwztErJlQyNKO/preview" },
+            { title: "Drips", img: "theeminemshow.png", url: "https://drive.google.com/file/d/1d5uS6d4Ibr046n3w0vPCpPKGNQ4hezgO/preview" },
+            { title: "Say Goodbye to Hollywood", img: "theeminemshow.png", url: "https://drive.google.com/file/d/1_fomy_LYQk8QXAJViI9R0xNEeQAe4vzU/preview" },
+            { title: "Soldier", img: "theeminemshow.png", url: "https://drive.google.com/file/d/1dolNxVBOiSZohYd3k8VR_QVBKzXIziiX/preview" },
+            { title: "Superman", img: "theeminemshow.png", url: "https://drive.google.com/file/d/1mlYzpZ360QwubpKYDf7N6NVQY0OiFJX2/preview" },
+            { title: "White America", img: "theeminemshow.png", url: "https://drive.google.com/file/d/1kaagtS6qyqlz4fE7IrspzZwJ7xcpuhUn/preview" },
+            { title: "Campeón", img: "legendaddy.png", url: "https://drive.google.com/file/d/1nKNkxXUBBPpYpGWbe53dyXVZzz9Ttlsx/preview" },
+            { title: "Pasatiempo", img: "legendaddy.png", url: "https://drive.google.com/file/d/1Y1Nb4lwdHjkcpKbXLE1t-2nCk4CJxNLl/preview" },
+            { title: "Rumbatón", img: "legendaddy.png", url: "https://drive.google.com/file/d/1R4KoJXt_RJXTtNIfQeAJmqNiCwYyJsjD/preview" },
+            { title: "Uno Quitao Y Otro Puesto", img: "legendaddy.png", url: "https://drive.google.com/file/d/1IiioxjHeaExvMj_PO9HNMjxUsARuMkNx/preview" },
+            { title: "Enchuletiao", img: "legendaddy.png", url: "https://drive.google.com/file/d/1D8MASfRAVWhzuflT9QrwO-g123_v5Ncp/preview" },
+            { title: "Agua", img: "legendaddy.png", url: "https://drive.google.com/file/d/14RyU9d86ivf7AXATwuvmE_DSKj2z0Ms_/preview" },
+            { title: "Impares", img: "legendaddy.png", url: "https://drive.google.com/file/d/1i4rVSN2N0bgBna7tSTkdZ3J3bOQxrXos/preview" },
+            { title: "Plug Walk", img: "richthekid.png", url: "https://drive.google.com/file/d/1cjOdT0jpR7uISwIYoGeNXkm6ooMe9wUV/preview" },
+            { title: "Motley Crew", img: "motleycrew.png", url: "https://drive.google.com/file/d/1ANVqcJuwn7u_d0nV-AlO-9z-4Vz7pEj-/preview" },
+            { title: "Laugh Now Cry Later", img: "laughnowcrylater.png", url: "https://drive.google.com/file/d/15WqmvfZrbtQTvw_Q3Ab5ek23xlXLWDJB/preview" },
+            { title: "Middle Child", img: "middlechild.png", url: "https://drive.google.com/file/d/1UdnaaiE1Huxd1WHWRr86b2z-LpNqiYbg/preview" },
+            { title: "Mood", img: "mood.png", url: "https://drive.google.com/file/d/1IQupAs8LIn9B8YSFSKlR1E7KiZbQMhqJ/preview" },
+            { title: "Welcome to the Rodeo", img: "welcometorodeo.png", url: "https://drive.google.com/file/d/1zv_otRlVVy-dcS5GFAhKKFVZDZSqfwTq/preview" },
+            { title: "Red Light Green Light", img: "redlightgreenlight.png", url: "https://drive.google.com/file/d/1RPcdpT_mbvV1u-swiehR-MNs0beqP_80/preview" },
+            { title: "Clueless", img: "clueless.png", url: "https://drive.google.com/file/d/1oJ-obP9SoQLkhfIQ9wB3K9C-JEgwlFGQ/preview" },
+            { title: "Rapstar", img: "rapstar.png", url: "https://drive.google.com/file/d/1mTXintGdS7dJyhrhhNs9dE-izrN8Uhv8/preview" }
+        ];
+
+        let favoritedSongs = JSON.parse(localStorage.getItem('v_music_favs') || '[]');
+
+        function toggleFavoriteSong(event, url) {
+            event.stopPropagation();
+            if (favoritedSongs.includes(url)) {
+                favoritedSongs = favoritedSongs.filter(item => item !== url);
+            } else {
+                favoritedSongs.push(url);
+            }
+            localStorage.setItem('v_music_favs', JSON.stringify(favoritedSongs));
+            filterMusic();
+        }
+
+        function getSortedMusicList(list) {
+            return [...list].sort((a, b) => {
+                const aFav = favoritedSongs.includes(a.url);
+                const bFav = favoritedSongs.includes(b.url);
+                if (aFav && !bFav) return -1;
+                if (!aFav && bFav) return 1;
+                return 0;
+            });
+        }
+
+        function renderMusicList(list) {
+            const container = document.getElementById('music-list-wrapper');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const sortedList = getSortedMusicList(list);
+
+            sortedList.forEach(song => {
+                const originalIndex = musicList.findIndex(s => s.url === song.url);
+                const isFav = favoritedSongs.includes(song.url);
+                const item = document.createElement('div');
+                item.className = 'music-list-item';
+                item.onclick = () => playMusic(originalIndex);
+
+                item.innerHTML = `
+                    <div class="music-list-left">
+                        <img src="${song.img}" alt="${song.title}" class="music-list-thumbnail" onerror="this.src='favicon.png'" loading="lazy">
+                        <span class="music-list-title">${song.title}</span>
+                    </div>
+                    <div class="music-list-actions">
+                        <button class="star-btn-inline ${isFav ? 'favorited' : ''}" title="${isFav ? 'Unpin from top' : 'Pin to top'}" onclick="toggleFavoriteSong(event, '${song.url}')">
+                            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        </button>
+                        <button class="music-list-play-btn" onclick="event.stopPropagation(); playMusic(${originalIndex});">▶ PLAY</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function filterMusic() {
+            const query = document.getElementById('music-search-input').value.toLowerCase().trim();
+            const filtered = musicList.filter(s => s.title.toLowerCase().includes(query));
+            renderMusicList(filtered);
+        }
+
+        function playMusic(index) {
+            const song = musicList[index];
+
+            document.getElementById('music-list-view').style.display = 'none';
+            const playerView = document.getElementById('music-player-view');
+            playerView.style.display = 'flex';
+
+            document.getElementById('music-current-title').textContent = song.title;
+            document.getElementById('music-current-art').src = song.img;
+
+            const driveFrame = document.getElementById('music-drive-frame');
+            driveFrame.src = song.url;
+        }
+
+        function exitMusicPlayer() {
+            const driveFrame = document.getElementById('music-drive-frame');
+            driveFrame.src = "about:blank";
+
+            document.getElementById('music-player-view').style.display = 'none';
+            document.getElementById('music-list-view').style.display = 'flex';
+        }
+
+        /* ================= TOOLS ENGINE ================= */
+        function toolBase64(mode) {
+            const input = document.getElementById('tool-base64-input').value;
+            const output = document.getElementById('tool-base64-output');
+            try {
+                if (mode === 'encode') {
+                    output.value = btoa(unescape(encodeURIComponent(input)));
+                } else {
+                    output.value = decodeURIComponent(escape(atob(input)));
+                }
+            } catch (e) {
+                output.value = "Error: Invalid Base64 String";
+            }
+        }
+
+        function toolURL(mode) {
+            const input = document.getElementById('tool-url-input').value;
+            const output = document.getElementById('tool-url-output');
+            try {
+                output.value = mode === 'encode' ? encodeURIComponent(input) : decodeURIComponent(input);
+            } catch (e) {
+                output.value = "Error: Invalid URL Component";
+            }
+        }
+
+        function toolJSONFormat() {
+            const input = document.getElementById('tool-json-input').value;
+            const output = document.getElementById('tool-json-output');
+            try {
+                const parsed = JSON.parse(input);
+                output.value = JSON.stringify(parsed, null, 4);
+            } catch (e) {
+                output.value = "Error: Invalid JSON Syntax";
+            }
+        }
+
+        function toolJSONMinify() {
+            const input = document.getElementById('tool-json-input').value;
+            const output = document.getElementById('tool-json-output');
+            try {
+                const parsed = JSON.parse(input);
+                output.value = JSON.stringify(parsed);
+            } catch (e) {
+                output.value = "Error: Invalid JSON Syntax";
+            }
+        }
+
+        async function toolGenerateHash() {
+            const input = document.getElementById('tool-hash-input').value;
+            const output = document.getElementById('tool-hash-output');
+            if (!input) {
+                output.value = "";
+                return;
+            }
+            try {
+                const msgBuffer = new TextEncoder().encode(input);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                output.value = hashHex;
+            } catch (e) {
+                output.value = "Error generating hash";
+            }
+        }
+
+        function toolUpdateTimestamp() {
+            document.getElementById('tool-current-timestamp').value = Date.now();
+        }
+
+        function toolConvertTimestamp() {
+            const val = document.getElementById('tool-ts-input').value.trim();
+            const output = document.getElementById('tool-ts-output');
+            let num = Number(val);
+            if (isNaN(num) || !val) {
+                output.value = "Error: Invalid numeric timestamp";
+                return;
+            }
+            if (num < 10000000000) num *= 1000;
+            output.value = new Date(num).toUTCString() + " (Local: " + new Date(num).toLocaleString() + ")";
+        }
+
+        /* Calculator logic */
+        let calcExpr = "";
+        function calcInput(val) {
+            if (calcExpr === "0" && !isNaN(val)) calcExpr = "";
+            calcExpr += val;
+            document.getElementById('calc-display').value = calcExpr;
+        }
+
+        function calcClear() {
+            calcExpr = "";
+            document.getElementById('calc-display').value = "0";
+        }
+
+        function calcBackspace() {
+            calcExpr = calcExpr.slice(0, -1);
+            document.getElementById('calc-display').value = calcExpr || "0";
+        }
+
+        function calcEvaluate() {
+            try {
+                const sanitized = calcExpr.replace(/[^0-9+\-*/().]/g, '');
+                const result = Function('"use strict";return (' + sanitized + ')')();
+                calcExpr = String(result);
+                document.getElementById('calc-display').value = calcExpr;
+            } catch (e) {
+                document.getElementById('calc-display').value = "Error";
+                calcExpr = "";
+            }
+        }
+
+        /* ================= CLOAKING ENGINE ================= */
+        const cloakPresets = {
+            docs: { name: "Google Docs", icon: "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" },
+            drive: { name: "Google Drive", icon: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" },
+            wikipedia: { name: "Wikipedia, the free encyclopedia", icon: "https://en.wikipedia.org/favicon.ico" },
+            canva: { name: "Home - Canva", icon: "https://www.canva.com/favicon.ico" },
+            youtube: { name: "YouTube", icon: "https://www.youtube.com/favicon.ico" },
+            github: { name: "GitHub", icon: "https://github.githubassets.com/favicons/favicon.svg" },
+            ixl: { name: "IXL | Dashboard", icon: "https://www.ixl.com/favicon.ico" },
+            canvas: { name: "Canvas LMS", icon: "https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico" }
+        };
+
+        function setCloak(name, icon) {
+            document.title = name || "Vengeance";
+            const fav = document.getElementById('tab-favicon');
+            if (fav) {
+                fav.href = icon || "favicon.png";
+            }
+        }
+
+        function applyPresetCloak(key) {
+            if (key === 'none' || !cloakPresets[key]) {
+                resetCloak();
+                return;
+            }
+            const p = cloakPresets[key];
+            document.getElementById('custom-cloak-name').value = '';
+            document.getElementById('custom-cloak-favicon').value = '';
+            setCloak(p.name, p.icon);
+        }
+
+        function applyCustomCloak() {
+            const name = document.getElementById('custom-cloak-name').value.trim();
+            let inputUrl = document.getElementById('custom-cloak-favicon').value.trim();
+            let iconUrl = inputUrl;
+
+            if (inputUrl && !inputUrl.match(/\.(png|ico|jpg|jpeg|svg|webp)($|\?)/i)) {
+                try {
+                    let fullUrl = inputUrl.startsWith('http') ? inputUrl : 'https://' + inputUrl;
+                    let parsed = new URL(fullUrl);
+                    iconUrl = `https://www.google.com/s2/favicons?domain=${parsed.hostname}&sz=64`;
+                } catch(e) {
+                    iconUrl = inputUrl;
+                }
+            }
+
+            setCloak(name || "Vengeance", iconUrl || "favicon.png");
+        }
+
+        function resetCloak() {
+            document.getElementById('cloak-preset-select').value = 'none';
+            document.getElementById('custom-cloak-name').value = '';
+            document.getElementById('custom-cloak-favicon').value = '';
+            setCloak("Vengeance", "favicon.png");
+        }
+
+        /* ================= PANIC ENGINE ================= */
+        let panicKey = localStorage.getItem('v_panic_key') || '`';
+        let isBindingPanic = false;
+
+        function updatePanicButtonLabel() {
+            const btn = document.getElementById('panic-key-btn');
+            if (btn) btn.textContent = `Press to Bind Key (Current: ${panicKey.toUpperCase()})`;
+        }
+
+        function bindPanicKey() {
+            isBindingPanic = true;
+            const btn = document.getElementById('panic-key-btn');
+            if (btn) btn.textContent = "Press any key now...";
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (isBindingPanic) {
+                e.preventDefault();
+                panicKey = e.key;
+                localStorage.setItem('v_panic_key', panicKey);
+                isBindingPanic = false;
+                updatePanicButtonLabel();
+                return;
+            }
+
+            if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+            if (e.key.toLowerCase() === panicKey.toLowerCase()) {
+                e.preventDefault();
+                let dest = document.getElementById('panic-redirect-url').value.trim() || 'https://www.google.com';
+                if (!dest.startsWith('http://') && !dest.startsWith('https://')) {
+                    dest = 'https://' + dest;
+                }
+                window.location.href = dest;
+            }
+        });
+
+        /* ================= BACKGROUNDS ENGINE ================= */
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        const patternDiv = document.getElementById('bg-pattern');
+
+        let bgMode = 'constellation';
+        let stars = [];
+        const numStars = 160;
+        const maxDist = 130;
+        let animId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for (let i = 0; i < numStars; i++) {
+            stars.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                vx: (Math.random() - 0.5) * 0.35,
+                vy: (Math.random() - 0.5) * 0.35,
+                radius: Math.random() * 1.8 + 0.5,
+                alpha: Math.random() * 0.7 + 0.3
+            });
+        }
+
+        function drawBackground() {
+            if (bgMode === 'solid') {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#030008';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                animId = requestAnimationFrame(drawBackground);
+                return;
+            }
+
+            if (bgMode === 'constellation') {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const radial = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width/1.2);
+                radial.addColorStop(0, '#0a021a');
+                radial.addColorStop(1, '#030008');
+                ctx.fillStyle = radial;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = 0; i < stars.length; i++) {
+                    let s = stars[i];
+                    s.x += s.vx;
+                    s.y += s.vy;
+
+                    if (s.x < 0) s.x = canvas.width;
+                    if (s.x > canvas.width) s.x = 0;
+                    if (s.y < 0) s.y = canvas.height;
+                    if (s.y > canvas.height) s.y = 0;
+
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(216, 180, 254, ${s.alpha})`;
+                    ctx.fill();
+
+                    for (let j = i + 1; j < stars.length; j++) {
+                        let s2 = stars[j];
+                        let dx = s.x - s2.x;
+                        let dy = s.y - s2.y;
+                        let dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < maxDist) {
+                            ctx.beginPath();
+                            ctx.moveTo(s.x, s.y);
+                            ctx.lineTo(s2.x, s2.y);
+                            let lineAlpha = (1 - (dist / maxDist)) * 0.22;
+                            ctx.strokeStyle = `rgba(168, 85, 247, ${lineAlpha})`;
+                            ctx.lineWidth = 0.6;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            } else if (bgMode === 'nebula') {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const time = Date.now() * 0.0005;
+                const g1 = ctx.createRadialGradient(
+                    canvas.width * 0.3 + Math.sin(time) * 100, 
+                    canvas.height * 0.4 + Math.cos(time) * 80, 
+                    50, 
+                    canvas.width * 0.3, 
+                    canvas.height * 0.4, 
+                    canvas.width * 0.6
+                );
+                g1.addColorStop(0, 'rgba(147, 51, 234, 0.25)');
+                g1.addColorStop(1, 'rgba(3, 0, 8, 0)');
+                
+                const g2 = ctx.createRadialGradient(
+                    canvas.width * 0.7 + Math.cos(time) * 120, 
+                    canvas.height * 0.6 + Math.sin(time) * 90, 
+                    50, 
+                    canvas.width * 0.7, 
+                    canvas.height * 0.6, 
+                    canvas.width * 0.5
+                );
+                g2.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
+                g2.addColorStop(1, 'rgba(3, 0, 8, 0)');
+
+                ctx.fillStyle = '#030008';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = g1;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = g2;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            animId = requestAnimationFrame(drawBackground);
+        }
+
+        function changeBackground(mode) {
+            bgMode = mode;
+            if (animId) cancelAnimationFrame(animId);
+
+            if (mode === 'grid') {
+                canvas.style.display = 'none';
+                patternDiv.style.display = 'block';
+                patternDiv.style.background = `
+                    linear-gradient(to right, rgba(168, 85, 247, 0.25) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(168, 85, 247, 0.25) 1px, transparent 1px),
+                    #030008
+                `;
+                patternDiv.style.backgroundSize = '40px 40px';
+            } else if (mode === 'dots') {
+                canvas.style.display = 'none';
+                patternDiv.style.display = 'block';
+                patternDiv.style.background = `
+                    radial-gradient(rgba(168, 85, 247, 0.4) 1.5px, transparent 1.5px),
+                    #030008
+                `;
+                patternDiv.style.backgroundSize = '24px 24px';
+            } else {
+                patternDiv.style.display = 'none';
+                canvas.style.display = 'block';
+                drawBackground();
+            }
+            localStorage.setItem('v_bg', mode);
+        }
+
+
+        /* ================= NAVIGATION ROUTER ================= */
+        function switchTab(tabId) {
+            ['games', 'movies', 'music', 'ai', 'codespace', 'tools', 'anime', 'settings', 'info', 'terms', 'credit', 'privacy'].forEach(id => {
+                const panel = document.getElementById(`panel-${id}`);
+                const btn = document.getElementById(`btn-${id}`);
+                if (panel) panel.classList.remove('active');
+                if (btn) btn.classList.remove('active');
+            });
+            const targetPanel = document.getElementById(`panel-${tabId}`);
+            const targetBtn = document.getElementById(`btn-${tabId}`);
+            if (targetPanel) targetPanel.classList.add('active');
+            if (targetBtn) targetBtn.classList.add('active');
+
+           }
+
+        /* ================= GN-MATH & LUMINALOS GAMES CATALOG ================= */
+        const coverURL = "https://cdn.jsdelivr.net/gh/freebuisness/covers@main";
+        const htmlURL = "https://cdn.jsdelivr.net/gh/freebuisness/html@main";
+        let cachedGames = [];
+
+        function isPlayableGame(game) {
+            if (!game || !game.name) return false;
+            const lower = game.name.toLowerCase().trim();
+            const blockedPhrases = [
+                'suggest games', 'suggest a game', 'suggest game', 'suggestion', 
+                'suggestions', 'comments', 'comment section', 'feedback', 
+                'report a bug', 'request games', 'request a game'
+            ];
+            return !blockedPhrases.some(phrase => lower.includes(phrase));
+        }
+
+        async function fetchGNMathGames() {
+            const endpoints = [
+                "https://cdn.jsdelivr.net/gh/freebuisness/assets@main/zones.json",
+                "https://cdn.jsdelivr.net/gh/freebuisness/assets@latest/zones.json",
+                "https://raw.githubusercontent.com/freebuisness/assets/main/zones.json"
+            ];
+
+            let gnMathSuccess = false;
+
+            for (let url of endpoints) {
+                try {
+                    const response = await fetch(url + "?t=" + Date.now());
+                    if (!response.ok) continue;
+                    let data = await response.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        data = data.filter(isPlayableGame);
+                        cachedGames = data;
+                        gnMathSuccess = true;
+                        break;
+                    }
+                } catch (e) {
+                    console.warn("GN-Math fetch retry...", e);
+                }
+            }
+
+            await fetchLuminalOSGames();
+
+            if (cachedGames.length > 0) {
+                renderGNMathCatalog(cachedGames);
+                updateFeaturedBanner();
+            } else if (!gnMathSuccess) {
+                document.getElementById('games-grid').innerHTML = `
+                    <div class="status-msg" style="color: #ff4d4d;">FAILED TO LOAD GAMES REPOSITORY. PLEASE REFRESH.</div>
+                `;
+            }
+        }
+
+        async function fetchLuminalOSGames() {
+            const luminalEndpoints = [
+                "https://cdn.jsdelivr.net/gh/luminal-os/luminal/games.json",
+                "https://raw.githubusercontent.com/luminal-os/luminal/main/games.json",
+                "https://cdn.jsdelivr.net/gh/luminal-os/luminal@main/public/games.json"
+            ];
+
+            for (let lUrl of luminalEndpoints) {
+                try {
+                    const res = await fetch(lUrl + "?t=" + Date.now());
+                    if (!res.ok) continue;
+                    let luminalList = await res.json();
+                    if (Array.isArray(luminalList) && luminalList.length > 0) {
+                        luminalList.forEach(lg => {
+                            if (lg && (lg.name || lg.title) && (lg.url || lg.link || lg.file)) {
+                                const gName = lg.name || lg.title;
+                                const exists = cachedGames.some(existing => existing.name.toLowerCase().trim() === gName.toLowerCase().trim());
+                                if (!exists) {
+                                    cachedGames.push({
+                                        name: gName,
+                                        cover: lg.cover || lg.icon || lg.image || lg.thumbnail || '',
+                                        url: lg.url || lg.link || lg.file
+                                    });
+                                }
+                            }
+                        });
+                        break;
+                    }
+                } catch (err) {
+                    console.warn("LuminalOS fetch attempt bypassed:", err);
+                }
+            }
+        }
+
+        function renderGNMathCatalog(games) {
+            const grid = document.getElementById('games-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            if (!games || games.length === 0) {
+                grid.innerHTML = `<div class="status-msg">No games match your search.</div>`;
+                return;
+            }
+
+            games.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.onclick = () => launchGNMathGame(game);
+
+                const coverSrc = game.cover ? game.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL) : '';
+
+                card.innerHTML = `
+                    <img src="${coverSrc}" alt="${game.name}" loading="lazy" onerror="this.style.display='none'">
+                    <span>${game.name}</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterGames() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            const filtered = cachedGames.filter(g => g.name.toLowerCase().includes(query));
+            renderGNMathCatalog(filtered);
+        }
+
+        function launchGNMathGame(game) {
+            if (!game || !game.url) return;
+
+            const overlay = document.getElementById('media-overlay');
+            const mediaFrame = document.getElementById('media-frame');
+            overlay.style.display = 'flex';
+
+            if (game.url.startsWith("http://") || game.url.startsWith("https://")) {
+                mediaFrame.removeAttribute('srcdoc');
+                mediaFrame.src = game.url;
+                return;
+            }
+
+            const targetUrl = game.url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
+
+            fetch(targetUrl + "?t=" + Date.now())
+                .then(res => {
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                    return res.text();
+                })
+                .then(html => {
+                    const safeGamepadShim = `
+                        <script>
+                            (function() {
+                                try {
+                                    var origGetGamepads = navigator.getGamepads || navigator.webkitGetGamepads;
+                                    navigator.getGamepads = function() {
+                                        try { return (origGetGamepads && origGetGamepads.apply(navigator, arguments)) || []; } catch(e) { return []; }
+                                    };
+                                } catch(e) {
+                                    try {
+                                        Object.defineProperty(navigator, 'getGamepads', { value: function() { return []; }, configurable: true, writable: true });
+                                    } catch(err) {}
+                                }
+                            })();
+                        <\/script>
+                    `;
+                    let finalHtml = html.includes('<head>') ? html.replace('<head>', '<head>' + safeGamepadShim) : safeGamepadShim + html;
+                    mediaFrame.removeAttribute('src');
+                    mediaFrame.srcdoc = finalHtml;
+                })
+                .catch(() => {
+                    mediaFrame.removeAttribute('srcdoc');
+                    mediaFrame.src = targetUrl;
+                });
+        }
+
+        /* ================= MOVIE LAUNCHER ================= */
+        function launchMovie(driveUrl) {
+            const overlay = document.getElementById('media-overlay');
+            const mediaFrame = document.getElementById('media-frame');
+            overlay.style.display = 'flex';
+            mediaFrame.removeAttribute('srcdoc');
+            mediaFrame.src = driveUrl;
+        }
+
+        function closeMedia() {
+            const overlay = document.getElementById('media-overlay');
+            const mediaFrame = document.getElementById('media-frame');
+
+            if (document.fullscreenElement) document.exitFullscreen();
+            overlay.style.display = 'none';
+            mediaFrame.removeAttribute('srcdoc');
+            mediaFrame.src = "about:blank";
+        }
+
+        /* ================= INITIALIZATION ================= */
+        window.addEventListener('DOMContentLoaded', () => {
+            updateFeaturedBanner();
+            fetchGNMathGames();
+            updateMovieDisplay();
+            updateAnimeDisplay();
+            renderMusicList(musicList);
+
+            // Initialize Timestamp Tool
+            toolUpdateTimestamp();
+
+            // Set initial state
+            changeTheme('purple');
+            changeBackground('constellation');
+            updatePanicButtonLabel();
+        });
+    </script>
+</body>
+</html>
